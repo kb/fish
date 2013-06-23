@@ -4,6 +4,11 @@ function __fish_git_branches
   git branch --no-color -a 2>/dev/null | sed 's/^..//'
 end
 
+function __fish_git_local_branches
+  git branch --no-color 2>/dev/null | sed 's/^..//'
+end
+
+
 function __fish_git_tags
   git tag
 end
@@ -30,6 +35,20 @@ function __fish_git_ranges
       printf "%s..%s\n" $from_ref $to_ref
     end
   end
+end
+
+function __fish_git_non_opts
+  set cmd (commandline -opc)
+  set -e cmd[1] # git
+  set -e cmd[1] # git-subcommand
+  for i in $cmd
+    echo -n "$i" | grep -v "^-"
+  end
+end
+
+function __fish_git_push_remote_given
+  set non_opts (__fish_git_non_opts)
+  [ (count $non_opts) -ne 0 ]
 end
 
 function __fish_git_needs_command
@@ -151,8 +170,43 @@ complete -f -c git -n '__fish_git_using_command log' -l pretty -a 'oneline short
 # TODO options
 
 ### merge
-complete -f -c git -n '__fish_git_needs_command' -a merge -d 'Join two or more development historiesnd' -a push -d 'Update remote refs along with associated objects'
+complete -f -c git -n '__fish_git_needs_command' -a merge -d 'Join two or more development histories together'
+complete -f -c git -n '__fish_git_using_command merge' -a '(__fish_git_branches)' -d 'Branch'
+complete -f -c git -n '__fish_git_using_command merge' -l commit -d "Autocommit the merge"
+complete -f -c git -n '__fish_git_using_command merge' -l no-commit -d "Don't autocommit the merge"
+complete -f -c git -n '__fish_git_using_command merge' -l stat -d "Show diffstat of the merge"
+complete -f -c git -n '__fish_git_using_command merge' -s n -l no-stat -d "Don't show diffstat of the merge"
+complete -f -c git -n '__fish_git_using_command merge' -l squash -d "Squash changes from other branch as a single commit"
+complete -f -c git -n '__fish_git_using_command merge' -l no-squash -d "Don't squash changes"
+complete -f -c git -n '__fish_git_using_command merge' -l ff -d "Don't generate a merge commit if merge is fast forward"
+complete -f -c git -n '__fish_git_using_command merge' -l no-ff -d "Generate a merge commit even if merge is fast forward"
+
 # TODO options
+
+### mv
+complete -c git -n '__fish_git_needs_command'    -a mv -d 'Move or rename a file, a directory, or a symlink'
+# TODO options
+
+### prune
+complete -f -c git -n '__fish_git_needs_command' -a prune -d 'Prune all unreachable objects from the object database'
+# TODO options
+
+### pull
+complete -f -c git -n '__fish_git_needs_command' -a pull -d 'Fetch from and merge with another repository or a local branch'
+# TODO options
+
+### push
+complete -f -c git -n '__fish_git_needs_command' -a push -d 'Update remote refs along with associated objects'
+complete -f -c git -n '__fish_git_using_command push; and not __fish_git_push_remote_given' -l all -d 'Push all branches'
+complete -f -c git -n '__fish_git_using_command push; and not __fish_git_push_remote_given' -l mirror -d 'Push everything'
+complete -f -c git -n '__fish_git_using_command push; and not __fish_git_push_remote_given' -s n -l dry-run -d 'Just say what would be done'
+complete -f -c git -n '__fish_git_using_command push; and not __fish_git_push_remote_given' -l tags -d 'Push all tags'
+complete -f -c git -n '__fish_git_using_command push; and not __fish_git_push_remote_given' -s f -l force -d 'Force pushing'
+
+complete -f -c git -n '__fish_git_using_command push; and not __fish_git_push_remote_given' -a '(__fish_git_remotes)' -d 'Push to remote'
+
+complete -f -c git -n '__fish_git_using_command push; and __fish_git_push_remote_given' -a '(__fish_git_local_branches)' -d 'Push branch'
+complete -f -c git -n '__fish_git_using_command push; and __fish_git_push_remote_given' -a '(__fish_git_tags)' -d 'Push tag'
 
 ### rebase
 complete -f -c git -n '__fish_git_needs_command' -a rebase -d 'Forward-port local commits to the updated upstream head'
@@ -197,30 +251,4 @@ complete -f -c git -n '__fish_git_needs_command' -a format-patch -d 'Generate pa
 complete -f -c git -n '__fish_git_using_command format-patch' -a '(__fish_git_branches)' -d 'Branch'
 
 ### aliases (custom user-definer commands)
-complete -c git -n '__fish_git_needs_command' -a '(git config --get-regexp alias | sed -e "s/^alias\.\(\S\+\).*/\1/")' -d 'Alias (user-defined command)' together'
-complete -f -c git -n '__fish_git_using_command merge' -a '(__fish_git_branches)' -d 'Branch'
-complete -f -c git -n '__fish_git_using_command merge' -l commit -d "Autocommit the merge"
-complete -f -c git -n '__fish_git_using_command merge' -l no-commit -d "Don't autocommit the merge"
-complete -f -c git -n '__fish_git_using_command merge' -l stat -d "Show diffstat of the merge"
-complete -f -c git -n '__fish_git_using_command merge' -s n -l no-stat -d "Don't show diffstat of the merge"
-complete -f -c git -n '__fish_git_using_command merge' -l squash -d "Squash changes from other branch as a single commit"
-complete -f -c git -n '__fish_git_using_command merge' -l no-squash -d "Don't squash changes"
-complete -f -c git -n '__fish_git_using_command merge' -l ff -d "Don't generate a merge commit if merge is fast forward"
-complete -f -c git -n '__fish_git_using_command merge' -l no-ff -d "Generate a merge commit even if merge is fast forward"
-
-# TODO options
-
-### mv
-complete -c git -n '__fish_git_needs_command'    -a mv -d 'Move or rename a file, a directory, or a symlink'
-# TODO options
-
-### prune
-complete -f -c git -n '__fish_git_needs_command' -a prune -d 'Prune all unreachable objects from the object database'
-# TODO options
-
-### pull
-complete -f -c git -n '__fish_git_needs_command' -a pull -d 'Fetch from and merge with another repository or a local branch'
-# TODO options
-
-### push
-complete -f -c git -n '__fish_git
+complete -c git -n '__fish_git_needs_command' -a '(git config --get-regexp alias | sed -e "s/^alias\.\(\S\+\).*/\1/")' -d 'Alias (user-defined command)'
