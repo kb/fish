@@ -1,6 +1,6 @@
-set fish_git_dirty_color  red
-set fish_git_branch_color purple
-set fish_ruby_version_color yellow
+set fish_git_dirty_color red
+set fish_git_branch_color B22222
+set fish_ruby_version_color blue
 
 function prompt_git_dirty
   git diff > /dev/null 2>&1
@@ -25,5 +25,5 @@ function prompt_dollor
 end
 
 function fish_prompt
-  printf '%s%s %s%s %s%s%s%s' (set_color aaaaaa) (hostname|cut -d . -f 1) (set_color 00ffff) (prompt_pwd) (prompt_git_branch) (prompt_ruby_version) (prompt_dollor)
+  printf '%s%s %s%s %s%s%s%s' (set_color cccccc) (hostname|cut -d . -f 1) (set_color 757575) (prompt_pwd) (prompt_git_branch) (prompt_ruby_version) (prompt_dollor)
 end
